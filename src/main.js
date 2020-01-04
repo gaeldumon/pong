@@ -39,7 +39,7 @@ const net = {
 	}
 }
 
-function Pad(pSide) {
+function Pad() {
 	const pad = {};
 
 	pad.load = function(px) {
