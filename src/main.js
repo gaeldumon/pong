@@ -58,15 +58,35 @@ function Pad() {
 		};
 	}
 
+	pad.moveUp = function() {
+		pad.y -= pad.vy * (deltaTime/10);
+	}
+
+	pad.moveDown = function() {
+		pad.y += pad.vy * (deltaTime/10);
+	}
+
+	pad.bottomBorderStop = function() {
+		if (pad.y >= height - pad.h/2) {
+			pad.y = height - pad.h/2;
+		} 
+	}
+
+	pad.topBorderStop = function() {
+		if (pad.y <= pad.h/2) {
+			pad.y = pad.h/2;
+		} 
+	}
+
 	pad.update = function() {
 		if (keyIsDown(pad.controls.up)) {
-			pad.y -= pad.vy * (deltaTime/10);
+			pad.moveUp();
 		} else if (keyIsDown(pad.controls.down)) {
-			pad.y += pad.vy * (deltaTime/10);
+			pad.moveDown();
 		}
 
-		bottomBorderStop(pad, height - pad.h/2);
-		topBorderStop(pad, pad.h/2);
+		pad.bottomBorderStop();
+		pad.topBorderStop();
 	}
 
 	pad.draw = function() {
@@ -90,7 +110,6 @@ function Ball() {
 		ball.color = '#fefe4e';
 		ball.vx = 3;
 		ball.vy = 3;
-		ball.isOut = false;
 		ball.direction = 1;
 	}
 
@@ -99,28 +118,67 @@ function Ball() {
 		ball.y = height / 2;
 	}
 
-	ball.update = function(scoreBoardLeft, scoreBoardRight, padLeft, padRight) {
-		ball.x += ball.direction * (ball.vx * (deltaTime/30));
-		//ball.y += ball.direction * (ball.vy * (deltaTime/30));
+	ball.bottomBorderBounce = function() {
+		if (ball.y >= height - ball.radius) {
+			ball.y = height - ball.radius;
+			ball.vy = 0 - ball.vy;
+		} 
+	}
 
-		bottomBorderBounce(ball, height - ball.radius);
-		topBorderBounce(ball, ball.radius);
+	ball.topBorderBounce = function() {
+		if (ball.y <= ball.radius) {
+			ball.y = ball.radius;
+			ball.vy = 0 - ball.vy;
+		} 
+	}
+
+	ball.rightPadCollide = function(pad) {
+		if (ball.x >= (pad.x - pad.w/2 - ball.radius) &&
+			/*Checking if ball is on the FRONT side of the pad and not behind*/
+			ball.x < (pad.x + pad.w/2 - ball.radius) &&
+			ball.y >= (pad.y - pad.h/2) &&
+			ball.y <= (pad.y + pad.h/2)) {
+				ball.vx = 0 - ball.vx;
+		}
+	}
+
+	ball.leftPadCollide = function(pad) {
+		if (ball.x <= (pad.x + pad.w/2 + ball.radius) &&
+			/*Checking if ball is on the FRONT side of the pad and not behind*/
+			ball.x > (pad.x - pad.w/2 + ball.radius) &&
+			ball.y >= (pad.y - pad.h/2) &&
+			ball.y <= (pad.y + pad.h/2)) {
+				ball.vx = 0 - ball.vx;
+		}
+	}
+
+	ball.serveRight = function() {
+		ball.direction = 1;
+	}
+
+	ball.serveLeft = function() {
+		ball.direction = -1;
+	}
+
+	ball.update = function(scoreBoardLeft, scoreBoardRight, padLeft, padRight) {
+		ball.x += ball.direction * ball.vx * (deltaTime / 30);
+		ball.y += ball.direction * ball.vy * (deltaTime / 30);
+
+		ball.rightPadCollide(padRight);
+		ball.leftPadCollide(padLeft);
+
+		ball.bottomBorderBounce();
+		ball.topBorderBounce();
 
 		if (ball.x > width) {
 			scoreBoardLeft.score++;
-			ball.direction = 1;
+			ball.serveRight();
 			ball.reset();
 
 		} else if (ball.x < 0) {
 			scoreBoardRight.score++;
-			ball.direction = -1;
+			ball.serveLeft();
 			ball.reset();
-		}
-
-		if (ball.x > (padRight.x - padRight.w/2 - ball.radius)) {
-			ball.vx = 0 - ball.vx;
-		} else if (ball.x < (padLeft.x  + padLeft.w/2 + ball.radius)) {
-			ball.vx = 0 - ball.vx;
 		}
 	}
 
@@ -145,17 +203,24 @@ function setup() {
 	background('#1b002a');
 	noStroke();
 
+	/*Loading left score board at 40px on the X axis*/
 	scoreBoard1.load(40);
+	/*Loading right score board at 760px on the X axis*/
 	scoreBoard2.load(width - 40);
 
 	ball.load();
 
+	/*Loading left pad at 100px on the X axis*/
 	pad1.load(100);
+	/*Left pad is controlled with the z and s keyboard keys*/
 	pad1.setControls(asciiCodeKeyboard['z'], asciiCodeKeyboard['s']);
 
+	/*Loading right pad at 700px on the X axis*/
 	pad2.load(width - 100);
+	/*Right pad is controlled with the up and down arrow*/
 	pad2.setControls(UP_ARROW, DOWN_ARROW);
 
+	/*Loading the net, offering a graphic separation of the game screen*/
 	net.load();
 }
 
@@ -170,8 +235,8 @@ function draw() {
 	pad1.update();
 	pad2.update();
 
+	net.draw();
 	ball.draw()
 	pad1.draw();
 	pad2.draw();
-	net.draw();
 }
