@@ -48,7 +48,7 @@ function Pad() {
 		pad.color = '#06fdff';
 		pad.w = 10;
 		pad.h = 50;
-		pad.vy = 3;
+		pad.vy = 4;
 	}
 
 	pad.setControls = function(key1, key2) {
@@ -108,14 +108,19 @@ function Ball() {
 		ball.y = height / 2;
 		ball.radius = 6;
 		ball.color = '#fefe4e';
-		ball.vx = 3;
-		ball.vy = 3;
+		ball.vx = 4;
+		ball.vy = 4;
 		ball.direction = 1;
 	}
 
 	ball.reset = function() {
 		ball.x = width / 2;
 		ball.y = height / 2;
+	}
+
+	ball.faster = function() {
+		ball.vx++;
+		ball.vy++;
 	}
 
 	ball.bottomBorderBounce = function() {
@@ -138,7 +143,10 @@ function Ball() {
 			ball.x < (pad.x + pad.w/2 - ball.radius) &&
 			ball.y >= (pad.y - pad.h/2) &&
 			ball.y <= (pad.y + pad.h/2)) {
-				ball.vx = 0 - ball.vx;
+			
+			ball.x -= 1;
+			ball.vx = 0 - ball.vx;
+			ball.faster();
 		}
 	}
 
@@ -148,7 +156,10 @@ function Ball() {
 			ball.x > (pad.x - pad.w/2 + ball.radius) &&
 			ball.y >= (pad.y - pad.h/2) &&
 			ball.y <= (pad.y + pad.h/2)) {
-				ball.vx = 0 - ball.vx;
+
+			ball.x += 1;
+			ball.vx = 0 - ball.vx;
+			ball.faster();
 		}
 	}
 
@@ -166,7 +177,6 @@ function Ball() {
 
 		ball.rightPadCollide(padRight);
 		ball.leftPadCollide(padLeft);
-
 		ball.bottomBorderBounce();
 		ball.topBorderBounce();
 
