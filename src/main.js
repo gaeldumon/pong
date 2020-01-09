@@ -1,24 +1,20 @@
 function ScoreBoard() {
-	const board = {}
-
-	board.load = function(px) {
-		board.x = px;
-		board.y = 50;
-		board.color = '#fb2eeb';
-		board.size = 50;
-		board.score = 0;
+	this.load = function(px) {
+		this.x = px;
+		this.y = 50;
+		this.color = '#fb2eeb';
+		this.size = 50;
+		this.score = 0;
 	}
 
-	board.draw = function() {
+	this.draw = function() {
 		push();
 		textAlign(CENTER);
-		textSize(board.size);
-		fill(board.color);
-		text(board.score, board.x, board.y);
+		textSize(this.size);
+		fill(this.color);
+		text(this.score, this.x, this.y);
 		pop();
 	}
-
-	return board;
 }
 
 const net = {
@@ -40,173 +36,177 @@ const net = {
 }
 
 function Pad() {
-	const pad = {};
 
-	pad.load = function(px) {
-		pad.x = px;
-		pad.y = height / 2;
-		pad.color = '#06fdff';
-		pad.w = 10;
-		pad.h = 50;
-		pad.vy = 4;
+	this.load = function(pSide) {
+
+		this.type = pSide;
+
+		if (this.type === 'left')
+			this.x = 100;
+		else if (this.type === 'right')
+			this.x = width - 100;
+
+		this.y = height / 2;
+		this.color = '#06fdff';
+		this.w = 10;
+		this.h = 50;
+		this.vy = 4;
 	}
 
-	pad.setControls = function(key1, key2) {
-		pad.controls = {
+	this.setControls = function(key1, key2) {
+		this.controls = {
 			up: key1, 
 			down: key2
 		};
 	}
 
-	pad.moveUp = function() {
-		pad.y -= pad.vy * (deltaTime/10);
+	this.moveUp = function() {
+		this.y -= this.vy * (deltaTime/10);
 	}
 
-	pad.moveDown = function() {
-		pad.y += pad.vy * (deltaTime/10);
+	this.moveDown = function() {
+		this.y += this.vy * (deltaTime/10);
 	}
 
-	pad.bottomBorderStop = function() {
-		if (pad.y >= height - pad.h/2) {
-			pad.y = height - pad.h/2;
+	this.bottomBorderStop = function() {
+		if (this.y >= height - this.h/2) {
+			this.y = height - this.h/2;
 		} 
 	}
 
-	pad.topBorderStop = function() {
-		if (pad.y <= pad.h/2) {
-			pad.y = pad.h/2;
+	this.topBorderStop = function() {
+		if (this.y <= this.h/2) {
+			this.y = this.h/2;
 		} 
 	}
 
-	pad.update = function() {
-		if (keyIsDown(pad.controls.up)) {
-			pad.moveUp();
-		} else if (keyIsDown(pad.controls.down)) {
-			pad.moveDown();
-		}
+	this.update = function() {
+		if (keyIsDown(this.controls.up))
+			this.moveUp();
+		else if (keyIsDown(this.controls.down))
+			this.moveDown();
 
-		pad.bottomBorderStop();
-		pad.topBorderStop();
+		this.bottomBorderStop();
+		this.topBorderStop();
 	}
 
-	pad.draw = function() {
+	this.draw = function() {
 		push();
 		rectMode(CENTER);
-		fill(pad.color);
-		rect(pad.x, pad.y, pad.w, pad.h);
+		fill(this.color);
+		rect(this.x, this.y, this.w, this.h);
 		pop();
 	}
-
-	return pad;
 }
 
 function Ball() {
-	const ball = {};
 
-	ball.load = function() {
-		ball.x = width / 2;
-		ball.y = height / 2;
-		ball.radius = 6;
-		ball.color = '#fefe4e';
-		ball.vx = 4;
-		ball.vy = 4;
-		ball.direction = 1;
+	this.load = function() {
+		this.x = width / 2;
+		this.y = height / 2;
+		this.radius = 6;
+		this.color = '#fefe4e';
+		this.vx = 6;
+		this.vy = 6;
+		this.speed = 6;
+		this.direction = 1;
 	}
 
-	ball.reset = function() {
-		ball.x = width / 2;
-		ball.y = height / 2;
+	this.reset = function() {
+		this.x = width/2;
+		this.y = height/2;
 	}
 
-	ball.faster = function() {
-		ball.vx++;
-		ball.vy++;
+	this.faster = function() {
+		//this.speed++;
 	}
 
-	ball.bottomBorderBounce = function() {
-		if (ball.y >= height - ball.radius) {
-			ball.y = height - ball.radius;
-			ball.vy = 0 - ball.vy;
+	this.bottomBorderBounce = function() {
+		if (this.y >= height - this.radius) {
+			this.y = height - this.radius;
+			this.vy = 0 - this.vy;
 		} 
 	}
 
-	ball.topBorderBounce = function() {
-		if (ball.y <= ball.radius) {
-			ball.y = ball.radius;
-			ball.vy = 0 - ball.vy;
+	this.topBorderBounce = function() {
+		if (this.y <= this.radius) {
+			this.y = this.radius;
+			this.vy = 0 - this.vy;
 		} 
 	}
 
-	ball.rightPadCollide = function(pad) {
-		if (ball.x >= (pad.x - pad.w/2 - ball.radius) &&
-			/*Checking if ball is on the FRONT side of the pad and not behind*/
-			ball.x < (pad.x + pad.w/2 - ball.radius) &&
-			ball.y >= (pad.y - pad.h/2) &&
-			ball.y <= (pad.y + pad.h/2)) {
-			
-			ball.x -= 1;
-			ball.vx = 0 - ball.vx;
-			ball.faster();
+	this.rightPadCollide = function(pad) { 
+		if (this.x >= (pad.x - pad.w/2 - this.radius) &&
+			/*Checking if this is on the FRONT side of the pad and not behind*/
+			this.x < (pad.x + pad.w/2 - this.radius) &&
+			this.y >= (pad.y - pad.h/2) &&
+			this.y <= (pad.y + pad.h/2)) {
+
+			this.faster();
+			/*Repositioning the this a bit (outside pad) to avoid some bug*/
+			this.x -= 1;
+			this.vx = 0 - this.vx;
 		}
 	}
 
-	ball.leftPadCollide = function(pad) {
-		if (ball.x <= (pad.x + pad.w/2 + ball.radius) &&
-			/*Checking if ball is on the FRONT side of the pad and not behind*/
-			ball.x > (pad.x - pad.w/2 + ball.radius) &&
-			ball.y >= (pad.y - pad.h/2) &&
-			ball.y <= (pad.y + pad.h/2)) {
+	this.leftPadCollide = function(pad) {
+		if (this.x <= (pad.x + pad.w/2 + this.radius) &&
+			/*Checking if this is on the FRONT side of the pad and not behind*/
+			this.x > (pad.x - pad.w/2 + this.radius) &&
+			this.y >= (pad.y - pad.h/2) &&
+			this.y <= (pad.y + pad.h/2)) {
 
-			ball.x += 1;
-			ball.vx = 0 - ball.vx;
-			ball.faster();
+			this.faster();
+			/*Repositioning the this a bit (outside pad) to avoid some bug*/
+			this.x += 1;
+			this.vx = 0 - this.vx;
 		}
 	}
 
-	ball.serveRight = function() {
-		ball.direction = 1;
+	this.serveRight = function() {
+		this.direction = 1;
 	}
 
-	ball.serveLeft = function() {
-		ball.direction = -1;
+	this.serveLeft = function() {
+		this.direction = -1;
 	}
 
-	ball.update = function(scoreBoardLeft, scoreBoardRight, padLeft, padRight) {
-		ball.x += ball.direction * ball.vx * (deltaTime / 30);
-		ball.y += ball.direction * ball.vy * (deltaTime / 30);
+	this.update = function(scoreBoardLeft, scoreBoardRight, padLeft, padRight) {
+		this.x += this.direction * (this.vx * (deltaTime/30));
+		this.y += this.direction * (this.vy * (deltaTime/30));
 
-		ball.rightPadCollide(padRight);
-		ball.leftPadCollide(padLeft);
-		ball.bottomBorderBounce();
-		ball.topBorderBounce();
+		this.rightPadCollide(padRight);
+		this.leftPadCollide(padLeft);
 
-		if (ball.x > width) {
+		this.bottomBorderBounce();
+		this.topBorderBounce();
+
+		if (this.x > width) {
 			scoreBoardLeft.score++;
-			ball.serveRight();
-			ball.reset();
+			this.serveRight();
+			this.reset();
 
-		} else if (ball.x < 0) {
+		} else if (this.x < 0) {
 			scoreBoardRight.score++;
-			ball.serveLeft();
-			ball.reset();
+			this.serveLeft();
+			this.reset();
 		}
 	}
 
-	ball.draw = function() {
+	this.draw = function() {
 		push();
-		fill(ball.color);
-		circle(ball.x, ball.y, ball.radius*2);
+		fill(this.color);
+		circle(this.x, this.y, this.radius*2);
 		pop();
 	}
-
-	return ball;
 }
 
-let scoreBoard1 = ScoreBoard();
-let scoreBoard2 = ScoreBoard();
-const ball = Ball();
-const pad1 = Pad();
-const pad2 = Pad();
+let scoreBoard1 = new ScoreBoard();
+let scoreBoard2 = new ScoreBoard();
+
+const ball = new Ball();
+const pad1 = new Pad();
+const pad2 = new Pad();
 
 function setup() {
 	createCanvas(800, 400);
@@ -220,13 +220,13 @@ function setup() {
 
 	ball.load();
 
-	/*Loading left pad at 100px on the X axis*/
-	pad1.load(100);
+	/*Loading left pad at 100px (cf. pad object) on the X axis*/
+	pad1.load('left');
 	/*Left pad is controlled with the z and s keyboard keys*/
 	pad1.setControls(asciiCodeKeyboard['z'], asciiCodeKeyboard['s']);
 
-	/*Loading right pad at 700px on the X axis*/
-	pad2.load(width - 100);
+	/*Loading right pad at 700px (cf. pad object) on the X axis*/
+	pad2.load('right');
 	/*Right pad is controlled with the up and down arrow*/
 	pad2.setControls(UP_ARROW, DOWN_ARROW);
 
@@ -237,14 +237,12 @@ function setup() {
 function draw() {
 	background('#1b002a');
 
-	scoreBoard1.draw();
-	scoreBoard2.draw();
-
 	ball.update(scoreBoard1, scoreBoard2, pad1, pad2);
-
 	pad1.update();
 	pad2.update();
 
+	scoreBoard1.draw();
+	scoreBoard2.draw();
 	net.draw();
 	ball.draw()
 	pad1.draw();
