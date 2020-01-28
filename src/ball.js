@@ -5,6 +5,14 @@
 */
 
 function Ball() {
+	this.preload = function() {
+		soundFormats('wav');
+		this.sounds = {
+			collide: loadSound('assets/SFX_pop2.wav'),
+			out: loadSound('assets/SFX_zapper.wav')
+		}
+	}
+
 	this.load = function() {
 		this.x = width / 2;
 		this.y = height / 2;
@@ -79,26 +87,25 @@ function Ball() {
 		this.y += this.direction * (this.vy * (deltaTime/30));
 
 		if (this.padCollide(pads.left)) {
-			// On deplace legerement la balle sur la droite de 1 px
-			// (hors du pad gauche)
-			// pour s'eviter un peu de non-determinisme
 			ball.x += 1;
 			ball.vx = 0 - ball.vx;
+			this.sounds.collide.play();
 		} else if (this.padCollide(pads.right)) {
-			// Pareil on deplace de 1 px la balle sur la gauche cette fois
-			// (hors du pad droit)
 			ball.x -= 1;
 			ball.vx = 0 - ball.vx;
+			this.sounds.collide.play();
 		}
 
 		if (this.x >= width) {
-			pads.left.score.value += 1;
+			pads.left.score.value += 1
+			this.sounds.out.play();
+			this.reset();
 			this.serveRight();
-			this.reset();
-		} else if (this.x <= 0) {
+		} else if (this.x < 0)  {
 			pads.right.score.value += 1;
-			this.serveLeft();
+			this.sounds.out.play();
 			this.reset();
+			this.serveLeft();
 		}
 
 		this.borderBounce();

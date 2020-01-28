@@ -9,6 +9,10 @@ const pads = {
 const ball = new Ball();
 
 class Game {
+	preload() {
+		ball.preload();
+	}
+
 	load() {
 		pads.left.load()
 		pads.right.load();

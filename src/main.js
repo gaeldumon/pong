@@ -9,6 +9,10 @@
 
 const game = new Game();
 
+function preload() {
+	game.preload();
+}
+
 function setup() {
 	createCanvas(800, 400);
 	background('#1b002a');
