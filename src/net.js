@@ -1,3 +1,10 @@
+/*
+* Objet "filet de terrain"
+* Dessine une simple ligne au milieu du terrain (sous forme de rectangle).
+* J'ai trouvé ça neammoins plus propre de creer un objet exprés. Il n'y aura
+* jamais plus d'un seul filet donc pas de constructeur.
+*/
+
 const net = {
 	load: function() {
 		this.x = width / 2;

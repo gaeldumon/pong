@@ -1,3 +1,12 @@
+/*
+* Constructeur "raquette"
+* Les touches du clavier a utiliser pour le deplacement des pads sont definies dans
+* l'appel de la methode setControls() dans le load().
+* Les collisions avec la balle sont gérées dans le constructeur Ball() de ball.js
+* Pad() se charge aussi de dessiner le score, le point de vue adopté ici est que 
+* 1 pad = 1 joueur (donc 1 score).
+*/
+
 function Pad(pSide) {
 	this.load = function() {
 		this.type = pSide;
@@ -15,16 +24,18 @@ function Pad(pSide) {
 			size: 50
 		};
 
+		// Limites dont le pad ne va pas au dela (haut et bas du canvas)*/
 		this.limits = {
 			top: 0,
 			bottom: height - this.h
 		};
 
+		// Abstraction du positionnement des differents pad grâce aux parametres
+		// cela evite de devoir passer des coordonées en dur en arguments
 		if (this.type === 'left') {
 			this.x = 100;
-			this.score.x = 100;
+			this.score.x = this.x;
 			this.setControls(asciiCodeKeyboard['z'], asciiCodeKeyboard['s']);
-
 		} else if (this.type === 'right') {
 			this.x = width - 100;
 			this.score.x = this.x;
@@ -57,7 +68,6 @@ function Pad(pSide) {
 	this.borderStop = function() {
 		if (this.y <= this.limits.top) {
 			this.y = this.limits.top;
-
 		} else if (this.y >= this.limits.bottom) {
 			this.y = this.limits.bottom;
 		}
@@ -66,7 +76,6 @@ function Pad(pSide) {
 	this.update = function() {
 		if (keyIsDown(this.controls.up)) {
 			this.moveUp();
-
 		} else if (keyIsDown(this.controls.down)) {
 			this.moveDown();
 		}
