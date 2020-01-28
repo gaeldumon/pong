@@ -1,4 +1,7 @@
-/**26/01/2020 : To fix => no collision with left pad !**/
+/**
+* Small pong game (2 players)
+* Lib : p5.js
+**/
 
 const net = {
 	load: function() {
@@ -21,7 +24,6 @@ const net = {
 /******************************************************************************/
 
 function Pad(pSide) {
-
 	this.load = function() {
 		this.type = pSide;
 		this.y = height / 2;
@@ -29,23 +31,24 @@ function Pad(pSide) {
 		this.w = 10;
 		this.h = 50;
 		this.vy = 4;
+
 		this.score = {
 			value: 0,
-			x: 100,
+			x: 0,
 			y: 50,
 			color: '#fb2eeb',
 			size: 50
 		};
 
 		this.limits = {
-			top: 0 + this.h/2,
-			bottom: height - this.h/2
+			top: 0,
+			bottom: height - this.h
 		};
 
 		if (this.type === 'left') {
 			this.x = 100;
+			this.score.x = 100;
 			this.setControls(asciiCodeKeyboard['z'], asciiCodeKeyboard['s']);
-
 		} else if (this.type === 'right') {
 			this.x = width - 100;
 			this.score.x = this.x;
@@ -77,11 +80,8 @@ function Pad(pSide) {
 
 	this.borderStop = function() {
 		if (this.y <= this.limits.top) {
-
 			this.y = this.limits.top;
-
 		} else if (this.y >= this.limits.bottom) {
-
 			this.y = this.limits.bottom;
 		}
 	}
@@ -100,7 +100,6 @@ function Pad(pSide) {
 		this.drawScore();
 
 		push();
-		rectMode(CENTER);
 		fill(this.color);
 		rect(this.x, this.y, this.w, this.h);
 		pop();
@@ -118,7 +117,6 @@ function Ball() {
 		this.vx = 6;
 		this.vy = 6;
 		this.direction = 1;
-
 		this.limits = {
 			top: 0 + this.radius,
 			bottom: height - this.radius
@@ -143,31 +141,29 @@ function Ball() {
 		}
 	}
 
-	this.padCollide = function(pads) {
-		for (const pad of pads) {
+	this.padCollide = function(pad) {
+		let testX = this.x;
+		let testY = this.y;
 
-			if (this.y >= (pad.y - pad.h/2) && this.y <= (pad.y + pad.h/2)) {
+		if (this.x < pad.x) 
+			testX = pad.x;
+		else if (this.x > pad.x + pad.w)
+			testX = pad.x + pad.w;
 
-				if (pad.type === 'right') {
+		if (this.y < pad.y)
+			testY = pad.y;
+		else if (this.y > pad.y + pad.h)
+			testY = pad.y + pad.h;
 
-					if (this.x >= (pad.x - pad.w/2 - this.radius) &&
-						this.x < (pad.x + pad.w/2 - this.radius)) {
+		let distX = this.x - testX;
+		let distY = this.y - testY;
+		let distance = sqrt( (distX * distX) + (distY * distY) );
 
-						this.x -= 1;
-						this.vx = 0 - this.vx;
-					}
-
-				} else if (pad.type === 'left') {
-
-					if (this.x <= (pad.x - pad.w/2 - this.radius) &&
-						this.x > (pad.x - pad.w/2 + this.radius)) {
-
-						this.x += 1;
-						this.vx = 0 - this.vx;
-					}
-				}
-			}
+		if (distance <= this.radius) {
+			return true;
 		}
+
+		return false;
 	}
 
 	this.serveRight = function() {
@@ -182,23 +178,25 @@ function Ball() {
 		this.x += this.direction * (this.vx * (deltaTime/30));
 		this.y += this.direction * (this.vy * (deltaTime/30));
 
-		//Loop through pads given as parameter to detect collisions
-		this.padCollide(pads);
+		if (this.padCollide(pads.left)) {
+			ball.x += 1;
+			ball.vx = 0 - ball.vx;
+		} else if (this.padCollide(pads.right)) {
+			ball.x -= 1;
+			ball.vx = 0 - ball.vx;
+		}
+
+		if (this.x >= width) {
+			pads.left.score.value += 1;
+			this.serveRight();
+			this.reset();
+		} else if (this.x <= 0) {
+			pads.right.score.value += 1;
+			this.serveLeft();
+			this.reset();
+		}
 
 		this.borderBounce();
-
-		for (const pad of pads) {
-			if (pad.type === 'left' && this.x >= width) {
-				pad.score.value++;
-				this.serveRight();
-				this.reset();
-
-			} else if (pad.type === 'right' && this.x <= 0) {
-				pad.score.value++;
-				this.serveLeft();
-				this.reset();
-			}
-		}
 	}
 
 	this.draw = function() {
@@ -211,34 +209,57 @@ function Ball() {
 
 const pad1 = new Pad('left');
 const pad2 = new Pad('right');
-const pads = [pad1, pad2];
+const pads = {
+	left: pad1, 
+	right: pad2
+};
 
 const ball = new Ball();
+
+class Game {
+	load() {
+		pads.left.load()
+		pads.right.load();
+		ball.load();
+		net.load();
+	}
+
+	update() {
+		pads.left.update();
+		pads.right.update();
+		ball.update(pads);
+	}
+
+	draw() {
+		pads.left.draw();
+		pads.right.draw();
+		ball.draw();
+		net.draw();
+	}
+}
+
+const game = new Game();
+let START = false;
 
 function setup() {
 	createCanvas(800, 400);
 	background('#1b002a');
 	noStroke();
 
-	for (const pad of pads) {
-		pad.load();
-	}
+	game.load();
 
-	ball.load();
-
-	net.load();
+	let button = createButton('Start');
+	button.position(width/2-button.width/2+9, height/2);
+	button.mousePressed(function() {
+		START = true;
+		removeElements();
+	});
 }
 
 function draw() {
 	background('#1b002a');
 
-	for (const pad of pads) {
-		pad.update();
-		pad.draw();
-	}
+	if (START) game.update();
 
-	ball.update(pads);
-	ball.draw();
-
-	net.draw();
+	game.draw();
 }
