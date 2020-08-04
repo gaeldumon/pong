@@ -1,5 +1,5 @@
 # Pong
 
-### Simple Pong game with p5.js
+### Simple 2 players pong game with the p5.js lib
 
-p5.js is a graphic lib based on Processing and uses the html5 canvas : https://p5js.org/
+[Screenshot](screenshots/pong-1.png)
