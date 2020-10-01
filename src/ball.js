@@ -106,7 +106,7 @@ function Ball() {
 		if (this.padCollide(pads.left) || this.padCollide(pads.right)) {
 
 			ball.vx = 0 - ball.vx;
-			this.sounds.collide.play();
+			if (this.sounds.collide) this.sounds.collide.play();
 
 		}
 
@@ -114,14 +114,14 @@ function Ball() {
 		if (this.x >= width) {
 
 			pads.left.score.value += 1
-			this.sounds.out.play();
+			if (this.sounds.out) this.sounds.out.play();
 			this.reset();
 			this.serveRight();
 
 		} else if (this.x < 0)  {
 
 			pads.right.score.value += 1;
-			this.sounds.out.play();
+			if (this.sounds.out) this.sounds.out.play();
 			this.reset();
 			this.serveLeft();
 		}
