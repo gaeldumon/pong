@@ -1,4 +1,4 @@
-# Pong
+# Simply Pong
 
 ### Simple 2 players pong game with the p5.js lib
 
